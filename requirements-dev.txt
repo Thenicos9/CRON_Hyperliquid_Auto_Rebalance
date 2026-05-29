@@ -1,0 +1,3 @@
+-r requirements.txt
+# Dépendances de développement / tests.
+pytest>=7.0.0

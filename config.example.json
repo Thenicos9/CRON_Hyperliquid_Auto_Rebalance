@@ -1,0 +1,18 @@
+{
+    "global": {
+        "default_target_value_usd": 100.0,
+        "default_rebalance_threshold_pct": 0.1,
+        "default_trade_size_usd": 12.0,
+        "min_order_usd": 11.0,
+        "cooldown_minutes": 7,
+        "default_slippage_pct": 0.01
+    },
+    "tokens": {
+        "PURR": {
+            "enabled": true,
+            "target_value_usd": 150.0,
+            "rebalance_threshold_pct": 0.1,
+            "trade_size_usd": 20.0
+        }
+    }
+}

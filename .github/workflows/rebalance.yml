@@ -1,0 +1,74 @@
+name: Auto Rebalance
+
+# ATTENTION : ce workflow envoie de VRAIS ordres avec de VRAIS fonds.
+# Il doit être activé manuellement (l'auteur ne peut pas pousser un workflow
+# actif à votre place pour des raisons de permissions/sécurité).
+#
+# Prérequis dans Settings > Secrets and variables > Actions :
+#   Secrets :   HYPERLIQUID_SECRET_KEY, HYPERLIQUID_ADDRESS
+#               (optionnel) TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, DISCORD_WEBHOOK_URL
+#   Variables : CONFIG_JSON  -> le contenu de votre config.json
+#               (alternative : committez config.json, mais il est gitignored par défaut)
+
+on:
+  schedule:
+    # Toutes les 7 minutes. Note : GitHub peut retarder/regrouper les exécutions
+    # planifiées en période de forte charge ; ne comptez pas sur une ponctualité stricte.
+    - cron: "*/7 * * * *"
+  workflow_dispatch:  # permet aussi un déclenchement manuel (utile pour tester)
+
+permissions:
+  contents: read
+
+# Empêche deux exécutions de tourner en même temps (double ordre).
+concurrency:
+  group: auto-rebalance
+  cancel-in-progress: false
+
+jobs:
+  rebalance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # Restaure le fichier d'état (cooldown) d'une exécution à l'autre.
+      # Les runners sont éphémères : sans ce cache, le cooldown ne tiendrait pas.
+      - name: Restore cooldown state
+        uses: actions/cache@v4
+        with:
+          path: rebalance_state.json
+          key: rebalance-state-${{ github.run_id }}
+          restore-keys: |
+            rebalance-state-
+
+      # config.json est gitignored : on le reconstruit depuis la variable CONFIG_JSON
+      # si elle est définie (sinon on suppose qu'il a été committé volontairement).
+      - name: Materialize config.json
+        env:
+          CONFIG_JSON: ${{ vars.CONFIG_JSON }}
+        run: |
+          if [ -n "$CONFIG_JSON" ]; then
+            printf '%s' "$CONFIG_JSON" > config.json
+            echo "config.json reconstruit depuis la variable CONFIG_JSON."
+          elif [ -f config.json ]; then
+            echo "config.json présent dans le dépôt."
+          else
+            echo "::error::Aucun config.json (ni variable CONFIG_JSON, ni fichier committé)."
+            exit 1
+          fi
+
+      - name: Run rebalance
+        env:
+          HYPERLIQUID_SECRET_KEY: ${{ secrets.HYPERLIQUID_SECRET_KEY }}
+          HYPERLIQUID_ADDRESS: ${{ secrets.HYPERLIQUID_ADDRESS }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: python rebalance.py

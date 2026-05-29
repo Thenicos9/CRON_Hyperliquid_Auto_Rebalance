@@ -1,0 +1,4 @@
+# Dépendances runtime du bot.
+# Pinnez des versions exactes en production pour des exécutions reproductibles.
+hyperliquid-python-sdk>=0.9.0
+eth-account>=0.10.0
