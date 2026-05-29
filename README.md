@@ -128,4 +128,12 @@ config.example.json   # modèle de configuration
 requirements*.txt     # dépendances runtime / dev
 tests/                # tests unitaires et d'intégration
 .github/workflows/    # workflow CRON (à activer manuellement)
+CLAUDE.md             # guide pour les agents/contributeurs
 ```
+
+## 🤝 Contribuer
+
+L'architecture et les invariants à respecter (logique pure testable, gestion du
+cooldown, interprétation des réponses d'ordre, secrets non versionnés…) sont
+documentés dans [`CLAUDE.md`](CLAUDE.md). Toute contribution doit garder
+`python -m pytest` vert.
