@@ -1,36 +1,60 @@
-# Hyperliquid Auto Rebalance Bot 🤖
+# Hyperliquid Auto Rebalance Bot (Production Ready) 🚀
 
-Ce bot automatise le rebalancement de vos positions **Spot** sur Hyperliquid via GitHub Actions.
+Bot de gestion de portefeuille automatisé pour le marché **Spot** d'Hyperliquid. Ce bot maintient vos positions à une valeur cible définie, en vendant les surplus et en rachetant les baisses de manière disciplinée.
 
-## Fonctionnement
+## ✨ Caractéristiques
+- **Configurabilité Totale** : Paramètres globaux ou spécifiques par token.
+- **Auto-Génération** : Script d'initialisation qui scanne votre wallet pour créer la config.
+- **Sécurité API** : Gestion stricte des décimales (`szDecimals`) et des tailles minimales d'ordres (>10$).
+- **Zéro Maintenance** : Tourne gratuitement sur GitHub Actions toutes les 7 minutes.
+- **Slippage Contrôlé** : Ordres au marché avec protection de slippage de 1%.
 
-Le bot tourne toutes les **7 minutes** via un GitHub Action (Cron job).
-Il vérifie la valeur USD de vos positions spot et effectue un trade de rebalancement si les conditions sont remplies.
+## 🛠 Installation Rapide
 
-### Stratégie par défaut :
-- **Cible** : Chaque position doit valoir environ **100$**.
-- **Seuil** : Le rebalancement se déclenche si la position varie de **+/- 50%** (soit < 50$ ou > 150$).
-- **Trade** : Le bot achète ou vend une tranche fixe de **12$**.
+### 1. Préparation du Wallet
+Assurez-vous d'avoir :
+- Une clé privée Hyperliquid (ou clé API).
+- De l'USDC sur votre compte **Spot** pour les frais et les achats.
 
-## Configuration
+### 2. Configuration des Secrets GitHub
+Dans votre repo : `Settings > Secrets and variables > Actions` :
+- `HYPERLIQUID_SECRET_KEY` : Votre clé privée (0x...).
+- `HYPERLIQUID_ADDRESS` : Votre adresse publique.
 
-### 1. Secrets GitHub (Obligatoire)
-Allez dans `Settings > Secrets and variables > Actions` et ajoutez :
-- `HYPERLIQUID_SECRET_KEY` : Votre clé privée (format hex 0x...).
-- `HYPERLIQUID_ADDRESS` : Votre adresse de wallet publique.
+### 3. Initialisation de la Config
+Vous pouvez lancer le script `init_config.py` localement pour générer votre `config.json` de base, puis le push sur le repo.
 
-### 2. Fichier `config.json` (Optionnel)
-Vous pouvez modifier les paramètres dans `config.json` :
-- `target_value_usd` : Valeur cible en USD.
-- `rebalance_threshold_pct` : Seuil de déclenchement (0.5 = 50%).
-- `trade_size_usd` : Taille du trade de rebalancement.
-- `assets` : Liste des coins à surveiller (ex: `["PURR", "HYPE"]`). Si vide, surveille tous vos avoirs spot.
+```bash
+export HYPERLIQUID_ADDRESS=votre_adresse
+python init_config.py
+```
 
-## Installation
+## ⚙️ Structure de `config.json`
 
-1. Clonez ce repo.
-2. Configurez vos secrets sur GitHub.
-3. Le bot commencera à tourner automatiquement toutes les 7 minutes.
+```json
+{
+    "global": {
+        "default_target_value_usd": 100.0,
+        "default_rebalance_threshold_pct": 0.5,
+        "default_trade_size_usd": 12.0,
+        "min_order_usd": 11.0
+    },
+    "tokens": {
+        "PURR": {
+            "enabled": true,
+            "target_value_usd": 150.0,
+            "rebalance_threshold_pct": 0.3,
+            "trade_size_usd": 20.0
+        }
+    }
+}
+```
+
+## 🛡 Sécurité et Limites
+- **Rate Limits** : Le bot effectue une pause entre chaque ordre.
+- **Taille Min** : Le bot ne tentera jamais d'ordre < 10$ (limite Hyperliquid).
+- **Précision** : Utilisation des `szDecimals` officiels d'Hyperliquid pour éviter les erreurs d'API.
 
 ---
-*Note: Ce bot est fourni à titre informatif. Utilisez-le à vos propres risques. Assurez-vous d'avoir assez d'USDC sur votre compte spot pour les achats.*
+**Mainteneur Principal** : Manus Agent 🤖
+*Avertissement : Le trading de crypto-actifs comporte des risques. Ce bot est un outil d'automatisation, testez-le avec des petites sommes.*
