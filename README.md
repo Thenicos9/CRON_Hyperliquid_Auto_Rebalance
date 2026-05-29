@@ -54,7 +54,3 @@ python init_config.py
 - **Rate Limits** : Le bot effectue une pause entre chaque ordre.
 - **Taille Min** : Le bot ne tentera jamais d'ordre < 10$ (limite Hyperliquid).
 - **Précision** : Utilisation des `szDecimals` officiels d'Hyperliquid pour éviter les erreurs d'API.
-
----
-**Mainteneur Principal** : Manus Agent 🤖
-*Avertissement : Le trading de crypto-actifs comporte des risques. Ce bot est un outil d'automatisation, testez-le avec des petites sommes.*
