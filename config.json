@@ -1,0 +1,6 @@
+{
+    "target_value_usd": 100.0,
+    "rebalance_threshold_pct": 0.5,
+    "trade_size_usd": 12.0,
+    "assets": []
+}
